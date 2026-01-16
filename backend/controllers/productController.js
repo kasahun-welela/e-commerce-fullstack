@@ -3,7 +3,8 @@ import Product from "../model/product.js";
 export const getAllProducts = async (req, res) => {
   try {
     const { keyword, category, minPrice, maxPrice, rating } = req.query;
-
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 10);
     const query = {};
     if (keyword) {
       query.$or = [
@@ -23,16 +24,27 @@ export const getAllProducts = async (req, res) => {
       query.rating = { $gte: Number(rating) };
     }
 
-    console.log(query);
+    const skip = limit * (page - 1) || 0;
 
-    const products = await Product.find(query);
+    const products = await Product.find(query)
+      .skip(skip)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 });
+
+    const totalProducts = await Product.countDocuments(query);
+
     if (!products || products.length === 0)
       return res.status(404).json({
         success: false,
         description: "No products found",
       });
+
     res.status(200).json({
       success: true,
+      page: Number(page),
+      totalProducts: totalProducts,
+      totalPages: Math.ceil(totalProducts / limit),
+      limit: limit,
       count: products.length,
       products,
     });

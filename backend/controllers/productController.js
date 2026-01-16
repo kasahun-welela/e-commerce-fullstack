@@ -2,49 +2,54 @@ import Product from "../model/product.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { keyword, category, minPrice, maxPrice, rating } = req.query;
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    const { keyword, category, minPrice, maxPrice, rating, page, limit } =
+      req.query;
+
     const query = {};
+
     if (keyword) {
       query.$or = [
         { name: { $regex: keyword, $options: "i" } },
         { description: { $regex: keyword, $options: "i" } },
       ];
     }
+
     if (category) {
       query.category = category;
     }
+
     if (minPrice || maxPrice) {
       query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
-    }
-    if (rating) {
-      query.rating = { $gte: Number(rating) };
+      if (minPrice) query.price.$gte = minPrice;
+      if (maxPrice) query.price.$lte = maxPrice;
     }
 
-    const skip = limit * (page - 1) || 0;
+    if (rating) {
+      query.rating = { $gte: rating };
+    }
+
+    const skip = limit * (page - 1);
 
     const products = await Product.find(query)
       .skip(skip)
-      .limit(Number(limit))
+      .limit(limit)
       .sort({ createdAt: -1 });
 
     const totalProducts = await Product.countDocuments(query);
 
-    if (!products || products.length === 0)
+    if (!products || products.length === 0) {
       return res.status(404).json({
         success: false,
-        description: "No products found",
+        error: "No products found",
       });
+    }
 
     res.status(200).json({
       success: true,
-      page: Number(page),
-      totalProducts: totalProducts,
+      page,
+      totalProducts,
       totalPages: Math.ceil(totalProducts / limit),
-      limit: limit,
+      limit,
       count: products.length,
       products,
     });
@@ -67,7 +72,7 @@ export const createProduct = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      description: err.message,
+      error: err.message,
     });
   }
 };
@@ -78,7 +83,7 @@ export const getSingleProduct = async (req, res) => {
     if (!product)
       return res.status(404).json({
         success: false,
-        description: "Product not found",
+        error: "Product not found",
       });
 
     res.status(200).json({
@@ -88,7 +93,7 @@ export const getSingleProduct = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      description: err.message,
+      error: err.message,
     });
   }
 };
@@ -109,7 +114,7 @@ export const deleteProduct = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      description: err.message,
+      error: err.message,
     });
   }
 };
@@ -120,7 +125,7 @@ export const updateProduct = async (req, res) => {
     if (!product)
       return res.status(404).json({
         success: false,
-        description: "Product not found",
+        error: "Product not found",
       });
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -140,7 +145,7 @@ export const updateProduct = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      description: err.message,
+      error: err.message,
     });
   }
 };

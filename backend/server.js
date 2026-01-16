@@ -11,7 +11,6 @@ process.on("uncaughtException", (err) => {
 dotenv.config()
 const PORT = process.env.PORT
 ConnectDB()
-console.log(a)
 
 app.listen(PORT, ()=>{
     console.log(`the server started on ${PORT}`)

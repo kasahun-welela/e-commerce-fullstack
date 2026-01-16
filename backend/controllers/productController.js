@@ -1,16 +1,33 @@
 import Product from "../model/product.js";
 export const getAllProducts = async (req, res) => {
-  const products = await Product.find();
-  if (!products || products.length === 0)
-    return res.status(404).json({
-      success: false,
-      description: "No products found",
+  try {
+    const { keyword } = req.query;
+
+    const query = keyword
+      ? {
+          name: {
+            $regex: keyword,
+            $options: "i",
+          },
+        }
+      : {};
+    const products = await Product.find(query);
+    if (!products || products.length === 0)
+      return res.status(404).json({
+        success: false,
+        description: "No products found",
+      });
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
     });
-  res.status(200).json({
-    success: true,
-    count: products.length,
-    products,
-  });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      description: err.message,
+    });
+  }
 };
 export const createProduct = async (req, res) => {
   const product = await Product.create(req.body);
@@ -49,22 +66,26 @@ export const deleteProduct = async (req, res) => {
   });
 };
 
-export const updateProduct = async (req, res)=>{
-  const product = await Product.findById(req.params.id)
-   if (!product)
+export const updateProduct = async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product)
     return res.status(404).json({
       success: false,
       description: "Product not found",
     });
 
-  const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  const updatedProduct = await Product.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   res.status(200).json({
     success: true,
     description: "Product updated successfully",
     product: updatedProduct,
   });
-}
+};

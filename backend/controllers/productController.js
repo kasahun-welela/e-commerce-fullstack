@@ -2,16 +2,29 @@ import Product from "../model/product.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { keyword } = req.query;
+    const { keyword, category, minPrice, maxPrice, rating } = req.query;
 
-    const query = keyword
-      ? {
-          name: {
-            $regex: keyword,
-            $options: "i",
-          },
-        }
-      : {};
+    const query = {};
+    if (keyword) {
+      query.$or = [
+        { name: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ];
+    }
+    if (category) {
+      query.category = category;
+    }
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+    if (rating) {
+      query.rating = { $gte: Number(rating) };
+    }
+
+    console.log(query);
+
     const products = await Product.find(query);
     if (!products || products.length === 0)
       return res.status(404).json({

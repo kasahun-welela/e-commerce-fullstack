@@ -2,7 +2,7 @@ import Product from "../model/product.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { keyword, category, minPrice, maxPrice, rating, page, limit } =
+    const { keyword, category, minPrice, maxPrice, rating, page = 1, limit=10 } =
       req.query;
 
     const query = {};
@@ -27,7 +27,9 @@ export const getAllProducts = async (req, res) => {
     if (rating) {
       query.rating = { $gte: rating };
     }
-
+    console.log("page", page);
+    console.log("limit", limit);
+    
     const skip = limit * (page - 1);
 
     const products = await Product.find(query)

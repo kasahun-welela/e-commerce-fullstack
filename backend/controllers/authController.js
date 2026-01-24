@@ -13,9 +13,12 @@ export const registerUser = async (req, res) => {
       },
     });
     user.password = undefined;
+    const token = user.generatejwtToken();
     res.status(201).json({
       success: true,
+      description: "User registered successfully",
       user,
+      access_token: token,
     });
   } catch (err) {
     res.status(500).json({
@@ -46,10 +49,12 @@ export const loginUser = async (req, res) => {
     }
     user.password = undefined;
 
+    const token = user.generatejwtToken();
     res.status(200).json({
       success: true,
-      message: "Login successful",
+      description: "Login successful",
       user,
+      access_token: token,
     });
   } catch (err) {
     res.status(500).json({

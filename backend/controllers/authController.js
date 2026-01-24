@@ -1,4 +1,5 @@
 import { User } from "../model/user.js";
+import { sendToken } from "../utils/jwtToken.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -13,13 +14,7 @@ export const registerUser = async (req, res) => {
       },
     });
     user.password = undefined;
-    const token = user.generatejwtToken();
-    res.status(201).json({
-      success: true,
-      description: "User registered successfully",
-      user,
-      access_token: token,
-    });
+    sendToken(user, 201, res, "User registered successfully");
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -49,13 +44,7 @@ export const loginUser = async (req, res) => {
     }
     user.password = undefined;
 
-    const token = user.generatejwtToken();
-    res.status(200).json({
-      success: true,
-      description: "Login successful",
-      user,
-      access_token: token,
-    });
+    sendToken(user, 200, res, "Login successful");
   } catch (err) {
     res.status(500).json({
       success: false,

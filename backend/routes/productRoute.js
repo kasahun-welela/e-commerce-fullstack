@@ -7,14 +7,15 @@ import {
   updateProduct,
 } from "../controllers/productController.js";
 import { validateProductQuery } from "../middlewares/productMiddleware.js";
-import isAuthenticated from "../middlewares/authMiddleware.js";
+import isAuthenticated, { authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
-router.get("/products",  validateProductQuery, getAllProducts);
-router.post("/product/new", isAuthenticated, createProduct);
+router.get("/products", validateProductQuery, isAuthenticated, getAllProducts);
 router.get("/product/:id", getSingleProduct);
-router.delete("/product/:id", isAuthenticated, deleteProduct);
-router.put("/product/:id", isAuthenticated, updateProduct);
+// Admin routes
+router.post("/product/new", isAuthenticated,authorizeRoles("admin"), createProduct);
+router.delete("/product/:id", isAuthenticated,authorizeRoles("admin"), deleteProduct);
+router.put("/product/:id", isAuthenticated,authorizeRoles("admin"), updateProduct);
 
 export default router;

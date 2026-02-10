@@ -31,3 +31,16 @@ const isAuthenticated = async (req, res, next) => {
 
 export default isAuthenticated;
 
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      console.log(`Role (${req.user.role}) is not allowed to access this resource`);
+      return res.status(403).json({
+        success: false,
+        message: `Role (${req.user.role}) is not allowed to access this resource`,
+      });
+    }
+    next();
+  };
+  
+}

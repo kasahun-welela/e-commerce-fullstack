@@ -77,7 +77,12 @@ const productSchema = new mongoose.Schema({
                 required: true
             }
         }
-    ]
+    ],
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    }
 }, { timestamps: true });
 
 const Product = mongoose.model("Product", productSchema);

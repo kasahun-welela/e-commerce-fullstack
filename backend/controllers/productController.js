@@ -33,6 +33,7 @@ export const getAllProducts = async (req, res) => {
     const skip = limit * (page - 1);
 
     const products = await Product.find(query)
+      .populate("user", "name email")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -65,8 +66,9 @@ export const getAllProducts = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body);
-
+    
+    req.body.user = req.user._id;
+    const product = await Product.create(req.body)
     res.status(201).json({
       success: true,
       product,
